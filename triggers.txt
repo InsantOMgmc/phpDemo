@@ -1,0 +1,16 @@
+CREATE TRIGGER hash_passwordUpdate BEFORE UPDATE ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.password <> OLD.password THEN
+        SET NEW.password = SHA1(CONCAT(NEW.salt, MD5(NEW.password)));
+    END IF;
+END;
+
+CREATE TRIGGER salt_update BEFORE UPDATE ON users
+FOR EACH ROW
+BEGIN
+   IF NEW.salt != OLD.salt THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot update the salt value.';
+    END IF;
+END;
